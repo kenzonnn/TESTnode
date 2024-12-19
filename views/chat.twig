@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Document</title>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <h1>Bonjour</h1>
+  Message : <input type="text" id="chat">
+  <button onclick="sendMsg()">send</button>
+  <script>
+  var name = prompt('type your name !')
+  var socket = io();
+  socket.on('msg',(data)=>{
+    console.log(data)
+    var p = document.createElement('p')
+    p.innerText= data
+    document.body.append(p)
+  })
+  function sendMsg(){
+    var msg = document.getElementById('chat').value 
+    console.log(msg)
+    var data = {name ,msg}
+    console.log(data)
+    socket.emit('send-msg', msg)
+    
+  }
+  </script>
+</body>
+</html>
