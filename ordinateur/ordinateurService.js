@@ -2,20 +2,27 @@ var Ordinateur = require('./ordinateurModel');
 var socketIo = require('socket.io')
 
 function socketIO(server) {
+    const io = require('socket.io')(server);
     io.on('connection', (socket) => {
         console.log('Un utilisateur est connecté');
-    
-        socket.on('searchByCategory', (category) => {
+        socket.on('searchByCategory', async (category) => {
             console.log(`Recherche par catégorie : ${category}`);
-            ordinateurService.searchByCategory(category, socket);
+            try {
+                const ordinateurs = await Ordinateur.find({ categorie: category });
+                socket.emit('searchByCategoryResult', ordinateurs); 
+            } catch (err) {
+                socket.emit('error', { message: "Erreur lors de la recherche par catégorie", details: err });
+            }
         });
-    
+
         socket.on('disconnect', () => {
             console.log('Un utilisateur s\'est déconnecté');
         });
     });
+
     return io;
 }
+
 function OrdinateurView(req, res, next) {
     res.render('ordinateur');
 }

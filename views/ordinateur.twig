@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ordinateur - Recherche</title>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <h1>Recherche d'ordinateurs par catégorie</h1>
+    
+    <!-- Champ de saisie pour la catégorie -->
+    <label for="category">Catégorie : </label>
+    <input type="text" id="category" placeholder="Entrez une catégorie...">
+    <button onclick="searchByCategory()">Rechercher</button>
+
+    <!-- Conteneur pour afficher les résultats -->
+    <h2>Résultats :</h2>
+    <div id="results"></div>
+
+    <script>
+        // Initialiser la connexion Socket.IO
+        const socket = io();
+
+        // Fonction pour envoyer une recherche par catégorie
+        function searchByCategory() {
+            const category = document.getElementById('category').value;
+            if (!category) {
+                alert('Veuillez saisir une catégorie.');
+                return;
+            }
+
+            // Envoyer l'événement 'searchByCategory' avec la catégorie saisie
+            socket.emit('searchByCategory', category);
+        }
+
+        // Écouter les résultats renvoyés par le serveur
+        socket.on('searchByCategoryResult', (ordinateurs) => {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = ''; // Réinitialiser les résultats
+
+            if (ordinateurs.length === 0) {
+                resultsDiv.innerHTML = '<p>Aucun ordinateur trouvé pour cette catégorie.</p>';
+                return;
+            }
+
+            // Afficher les ordinateurs dans le DOM
+            ordinateurs.forEach(ordinateur => {
+                const p = document.createElement('p');
+                p.innerText = `Module: ${ordinateur.module}, Catégorie: ${ordinateur.categorie}, Prix: ${ordinateur.prix}, Date de fabrication: ${new Date(ordinateur.dateFabrication).toLocaleDateString()}`;
+                resultsDiv.appendChild(p);
+            });
+        });
+
+        // Écouter les erreurs
+        socket.on('error', (err) => {
+            alert('Erreur : ' + err.message);
+            console.error(err);
+        });
+    </script>
+</body>
+</html>
